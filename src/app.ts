@@ -1,20 +1,33 @@
-import { Request, Response, response } from 'express';
-import express from 'express';
-const fetch = require('node-fetch');
+import express, { Request, Response } from 'express';
+import fetch from 'node-fetch';
+import cheerio from 'cheerio';
+
+const PORT: Number = 3001;
 
 const app = express();
 
-app.get('/', (req: Request, res: Response) => {
-    res.send('hello');
-});
+app.get('/nyt', async (req: Request, res: Response) => {
+    const response = await fetch('https://nytimes.com/');
+    const body = await response.text();
+    const $ = cheerio.load(body)
+    const nyt_headlines = $('h2').text();
+    res.json(nyt_headlines);
+})
 
-app.get('/articles', async (req: Request, res: Response) => {
-    const nyt_url = `https://api.nytimes.com/svc/topstories/v2/home.json?api-key=${process.env.NYT_API_KEY}`
-    const fetch_response = await fetch(nyt_url);
-    const json = await fetch_response.json();
-    console.log(response.json(json));
-});
+app.get('/wsj', async (req: Request, res: Response) => {
+    const response = await fetch('https://wsj.com/');
+    const body = await response.text();
+    const $ = cheerio.load(body)
+    const wsj_headlines = $('h3').text();
+    res.json(wsj_headlines);
+})
 
-const PORT = 5000;
+app.get('/wapo', async (req: Request, res: Response) => {
+    const response = await fetch('https://www.washingtonpost.com//');
+    const body = await response.text();
+    const $ = cheerio.load(body)
+    const wapo_headlines = $('span').text();
+    res.json(wapo_headlines);
+})
 
 app.listen(PORT, () => console.log('server started on ', PORT));
